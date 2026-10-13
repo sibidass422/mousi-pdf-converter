@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GosttPDF - Smart PDF Cutter, Compressor & Toolkit</title>
+  <meta name="description" content="Ultra-fast, private client-side PDF cutter, image to PDF, compressor, merger, and smart text summarizer.">
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Local libraries with zero external dependencies -->
+  <script src="libs/pdf-lib.min.js"></script>
+  <script src="libs/pdf.min.js"></script>
+  <script src="libs/jszip.min.js"></script>
+</head>
+<body>
+  <!-- Ambient background glow -->
+  <div class="ambient-glow"></div>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo-wrap" id="brand-logo" title="GhostPDF">
+          <!-- Cute Ghost SVG Icon -->
+          <svg class="ghost-mascot" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C7.58 2 4 5.58 4 10v9.5c0 .64.71 1.03 1.25.7l1.75-1.07 2 1.22c.54.33 1.25-.06 1.25-.7v-.15c0-.47.53-.76.94-.52l1.06.63c.47.28 1.06.28 1.5 0l1.06-.63c.41-.24.94.05.94.52v.15c0 .64.71 1.03 1.25.7l2-1.22 1.75 1.07c.54.33 1.25-.06 1.25-.7V10c0-4.42-3.58-8-8-8zm-3 8.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm6 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+          </svg>
+        </div>
+        <div class="brand-info">
+          <h1>GostPDF <span class="badge-ghost">PRO</span></h1>
+          <p>Private &amp; Offline Client-Side PDF Studio</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="privacy-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          100% Private (Runs in Browser)
+        </div>
+        <button class="theme-toggle-btn" id="theme-toggle" title="Toggle Light/Dark Theme">
+          <span id="theme-icon">🌙</span>
+          <span id="theme-text">Dark</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs-wrapper">
+      <div class="nav-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="cutter" role="tab">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+          <span>Cut / Split PDF</span>
+        </button>
+        <button class="tab-btn" data-tab="compressor" role="tab">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          <span>Compress PDF</span>
+        </button>
+        <button class="tab-btn" data-tab="img2pdf" role="tab">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span>Image to PDF</span>
+        </button>
+        <button class="tab-btn" data-tab="merger" role="tab">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <span>Merge PDFs</span>
+        </button>
+        <button class="tab-btn" data-tab="summarizer" role="tab">
+          <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Text &amp; Summary</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Global Progress Bar Card -->
+    <div class="progress-card" id="global-progress-card">
+      <div class="progress-header">
+        <span id="progress-status-text">Processing document...</span>
+        <span id="progress-percentage-text">0%</span>
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" id="global-progress-fill"></div>
+      </div>
+    </div>
+
+    <!-- =========================================================
+         TAB 1: PDF CUTTER / EXTRACTOR (e.g. Extract 20 to 23)
+         ========================================================= -->
+    <section class="tab-content active" id="tab-cutter">
+      <div class="ghost-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+              PDF Cutter &amp; Page Splitter
+            </h2>
+            <p class="card-subtitle">Extract specific pages (e.g., 20 to 23), remove pages, or split into separate documents.</p>
+          </div>
+          <div id="cutter-file-badge" style="display: none;">
+            <span class="badge-ghost" id="cutter-file-info">0 Pages</span>
+          </div>
+        </div>
+
+        <!-- Cutter Upload Zone -->
+        <div class="upload-dropzone" id="cutter-dropzone">
+          <input type="file" id="cutter-file-input" accept="application/pdf">
+          <div class="upload-icon-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div>
+            <h3 class="upload-title">Choose a PDF file to Cut &amp; Split</h3>
+            <p class="upload-desc">Drop your 100+ page document here or click to browse. Safe, fast, 100% in your browser.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; z-index: 10;">
+            <button class="upload-browse-btn" type="button">Select PDF Document</button>
+            <button class="btn btn-secondary btn-sm" id="btn-cutter-demo" type="button" style="pointer-events: auto;">⚡ Try with 100-Page Sample PDF</button>
+          </div>
+        </div>
+
+        <!-- Cutter Main Workspace (Hidden until file selected) -->
+        <div id="cutter-workspace" style="display: none; margin-top: 20px;">
+          <!-- Controls Toolbar -->
+          <div class="cutter-controls">
+            <!-- Range input: Handles '20-23', '20 to 23', '1, 4, 10-15' -->
+            <div class="range-input-group">
+              <input type="text" id="cutter-range-input" class="form-input" placeholder="e.g. 20-23, 20 to 23, 1, 5-8" title="Enter page numbers or ranges">
+              <button class="btn btn-secondary btn-sm" id="btn-apply-range">Apply Range</button>
+            </div>
+
+            <!-- Quick Action Buttons -->
+            <div class="quick-select-btns">
+              <button class="btn btn-secondary btn-sm" id="btn-select-all">All</button>
+              <button class="btn btn-secondary btn-sm" id="btn-deselect-all">None</button>
+              <button class="btn btn-secondary btn-sm" id="btn-invert-selection">Invert</button>
+              <button class="btn btn-secondary btn-sm" id="btn-select-odd">Odd</button>
+              <button class="btn btn-secondary btn-sm" id="btn-select-even">Even</button>
+              <button class="btn btn-danger btn-sm" id="btn-cutter-reset">Clear File</button>
+            </div>
+          </div>
+
+          <!-- Selection status & Extract Actions Bar -->
+          <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">
+              Selected: <span id="cutter-selected-count" style="color: var(--ghost-purple); font-size: 1.1rem;">0</span> of <span id="cutter-total-count">0</span> pages
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+              <button class="btn btn-primary" id="btn-extract-selected">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Extract Selected Pages (.PDF)
+              </button>
+              <button class="btn btn-secondary" id="btn-split-all-zip" title="Download every selected page as separate PDFs">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                Split to Separate Files (.ZIP)
+              </button>
+              <button class="btn btn-danger btn-sm" id="btn-delete-selected" title="Remove selected pages and save remainder">
+                Delete Selected Pages
+              </button>
+            </div>
+          </div>
+
+          <!-- Visual Page Thumbnail Grid -->
+          <div class="page-grid-container" id="cutter-page-grid">
+            <!-- Dynamically populated page cards -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TAB 2: PDF COMPRESSOR (Low KB/MB & Quality Reducer)
+         ========================================================= -->
+    <section class="tab-content" id="tab-compressor">
+      <div class="ghost-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+              PDF Compressor (Size &amp; Quality Reducer)
+            </h2>
+            <p class="card-subtitle">Reduce file size to low KB/MB with customizable quality controls for forms, email, or web.</p>
+          </div>
+        </div>
+
+        <!-- Compressor Upload Zone -->
+        <div class="upload-dropzone" id="compressor-dropzone">
+          <input type="file" id="compressor-file-input" accept="application/pdf">
+          <div class="upload-icon-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div>
+            <h3 class="upload-title">Select PDF to Compress</h3>
+            <p class="upload-desc">Supports heavy documents with multiple images. Adjust quality to reach exact desired file size.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; z-index: 10;">
+            <button class="upload-browse-btn" type="button">Select PDF Document</button>
+            <button class="btn btn-secondary btn-sm" id="btn-compressor-demo" type="button" style="pointer-events: auto;">⚡ Try with Demo PDF</button>
+          </div>
+        </div>
+
+        <!-- Compressor Settings & Preview -->
+        <div id="compressor-workspace" style="display: none; margin-top: 20px;">
+          <!-- File Overview -->
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+            <div>
+              <div style="font-weight: 700; color: var(--text-main);" id="compressor-filename">document.pdf</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);" id="compressor-filedetails">0 pages • 0 MB</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btn-compressor-reset">Change File</button>
+          </div>
+
+          <!-- Compression Level Presets -->
+          <div class="form-label">Select Compression Preset</div>
+          <div class="preset-grid">
+            <div class="preset-card active" data-preset="balanced">
+              <div class="preset-card-title">⚖️ Recommended Balanced</div>
+              <p class="preset-card-desc">Great balance of small size and crisp readability (70% quality, 0.75x scale).</p>
+            </div>
+            <div class="preset-card" data-preset="extreme">
+              <div class="preset-card-title">⚡ Extreme Compression</div>
+              <p class="preset-card-desc">Smallest file size in low KB/MB for portals with strict upload limits (40% quality, 0.5x scale).</p>
+            </div>
+            <div class="preset-card" data-preset="high">
+              <div class="preset-card-title">💎 High Quality</div>
+              <p class="preset-card-desc">Clear imagery &amp; sharp text with slight size reduction (85% quality, 1.0x scale).</p>
+            </div>
+            <div class="preset-card" data-preset="custom">
+              <div class="preset-card-title">🛠️ Custom Control</div>
+              <p class="preset-card-desc">Fine-tune exact image resolution and JPEG quality sliders yourself.</p>
+            </div>
+          </div>
+
+          <!-- Custom Sliders Box (Shown when Custom is selected) -->
+          <div id="compressor-custom-box" style="display: none; padding: 16px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between;">
+                <label class="form-label">Image Quality</label>
+                <span id="slider-quality-val" style="font-weight: 700; color: var(--ghost-purple);">70%</span>
+              </div>
+              <input type="range" id="compressor-quality-slider" class="range-slider" min="10" max="95" value="70">
+              <div class="form-hint">Lower quality reduces file size significantly.</div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <div style="display: flex; justify-content: space-between;">
+                <label class="form-label">Resolution Scale / DPI</label>
+                <span id="slider-scale-val" style="font-weight: 700; color: var(--ghost-cyan);">0.75x</span>
+              </div>
+              <input type="range" id="compressor-scale-slider" class="range-slider" min="40" max="100" value="75">
+              <div class="form-hint">Downscales page canvas resolution to save massive memory and bytes.</div>
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button class="btn btn-primary btn-lg" id="btn-start-compress" style="width: 100%;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+            Compress PDF Now
+          </button>
+
+          <!-- Compression Result Card (Shown after finished) -->
+          <div id="compressor-results-card" style="display: none;">
+            <div class="size-comparison-box">
+              <div>
+                <div class="size-stat-label">Original Size</div>
+                <div class="size-stat-val" id="res-original-size">0 MB</div>
+              </div>
+              <div style="font-size: 1.6rem; color: var(--ghost-purple);">➔</div>
+              <div>
+                <div class="size-stat-label">Compressed Size</div>
+                <div class="size-stat-val size-stat-saved" id="res-compressed-size">0 KB</div>
+                <span class="badge-ghost" id="res-savings-badge" style="margin-top: 6px; display: inline-block;">-0% Saved</span>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-lg" id="btn-download-compressed" style="width: 100%;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download Compressed PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TAB 3: IMAGE TO PDF
+         ========================================================= -->
+    <section class="tab-content" id="tab-img2pdf">
+      <div class="ghost-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Image to PDF Converter
+            </h2>
+            <p class="card-subtitle">Convert JPG, PNG, WEBP images into a clean, combined PDF document with custom margins.</p>
+          </div>
+        </div>
+
+        <!-- Image Upload Zone -->
+        <div class="upload-dropzone" id="img2pdf-dropzone">
+          <input type="file" id="img2pdf-file-input" accept="image/*" multiple>
+          <div class="upload-icon-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div>
+            <h3 class="upload-title">Select or Drop Images</h3>
+            <p class="upload-desc">Select multiple images at once. Reorder, adjust page layout, and convert instantly.</p>
+          </div>
+          <button class="upload-browse-btn" type="button">Select Images (JPG, PNG, WEBP)</button>
+        </div>
+
+        <!-- Image Workspace -->
+        <div id="img2pdf-workspace" style="display: none; margin-top: 20px;">
+          <!-- Settings Toolbar -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; padding: 14px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Page Size</label>
+              <select id="img2pdf-pagesize" class="form-select">
+                <option value="fit" selected>Fit to Image Size</option>
+                <option value="a4">A4 (210 x 297 mm)</option>
+                <option value="letter">US Letter</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Orientation</label>
+              <select id="img2pdf-orientation" class="form-select">
+                <option value="auto" selected>Auto Match Image</option>
+                <option value="portrait">Portrait</option>
+                <option value="landscape">Landscape</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Margins</label>
+              <select id="img2pdf-margin" class="form-select">
+                <option value="0" selected>No Margin (Full Bleed)</option>
+                <option value="20">Small Margin</option>
+                <option value="40">Big Margin</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div style="font-weight: 700; color: var(--text-main);">
+              Images: <span id="img2pdf-count" style="color: var(--ghost-purple);">0</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-img2pdf-addmore">
+                + Add More Images
+              </button>
+              <button class="btn btn-danger btn-sm" id="btn-img2pdf-clear">Clear All</button>
+            </div>
+          </div>
+
+          <!-- Image Items Grid -->
+          <div class="image-list-grid" id="img2pdf-list">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Convert Button -->
+          <button class="btn btn-primary btn-lg" id="btn-convert-img2pdf" style="width: 100%; margin-top: 20px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Convert &amp; Download PDF
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TAB 4: MERGE PDFS (PDF ADD / COMBINE)
+         ========================================================= -->
+    <section class="tab-content" id="tab-merger">
+      <div class="ghost-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              Merge &amp; Add PDFs
+            </h2>
+            <p class="card-subtitle">Combine multiple PDF files into a single master document. Reorder with 1 click.</p>
+          </div>
+        </div>
+
+        <!-- Merger Upload Zone -->
+        <div class="upload-dropzone" id="merger-dropzone">
+          <input type="file" id="merger-file-input" accept="application/pdf" multiple>
+          <div class="upload-icon-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          </div>
+          <div>
+            <h3 class="upload-title">Select 2 or More PDFs to Merge</h3>
+            <p class="upload-desc">Drop your PDF documents here. You can add more files anytime and arrange order.</p>
+          </div>
+          <button class="upload-browse-btn" type="button">Select PDF Files</button>
+        </div>
+
+        <!-- Merger Workspace -->
+        <div id="merger-workspace" style="display: none; margin-top: 20px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+            <div style="font-weight: 700; color: var(--text-main);">
+              Documents to Merge: <span id="merger-count" style="color: var(--ghost-purple);">0</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-merger-addmore">+ Add More PDFs</button>
+              <button class="btn btn-danger btn-sm" id="btn-merger-clear">Clear All</button>
+            </div>
+          </div>
+
+          <!-- File list to merge -->
+          <div class="merge-list" id="merger-list">
+            <!-- Dynamically populated -->
+          </div>
+
+          <!-- Merge Action Button -->
+          <button class="btn btn-primary btn-lg" id="btn-start-merge" style="width: 100%; margin-top: 20px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Merge All Into One PDF
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         TAB 5: TEXT EXTRACTION & SMART SUMMARY
+         ========================================================= -->
+    <section class="tab-content" id="tab-summarizer">
+      <div class="ghost-card">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              PDF Text Extraction &amp; Smart Summary
+            </h2>
+            <p class="card-subtitle">Extract entire text from any PDF document and get instant key takeaways &amp; executive summaries.</p>
+          </div>
+        </div>
+
+        <!-- Summarizer Upload Zone -->
+        <div class="upload-dropzone" id="summarizer-dropzone">
+          <input type="file" id="summarizer-file-input" accept="application/pdf">
+          <div class="upload-icon-circle">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <div>
+            <h3 class="upload-title">Select PDF to Extract &amp; Summarize</h3>
+            <p class="upload-desc">Reads entire PDF text in milliseconds with offline smart TextRank extractive summary.</p>
+          </div>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; z-index: 10;">
+            <button class="upload-browse-btn" type="button">Select PDF Document</button>
+            <button class="btn btn-secondary btn-sm" id="btn-summarizer-demo" type="button" style="pointer-events: auto;">⚡ Try with Sample Report</button>
+          </div>
+        </div>
+
+        <!-- Summarizer Workspace -->
+        <div id="summarizer-workspace" style="display: none; margin-top: 20px;">
+          <!-- Document Analytics Bar -->
+          <div class="stats-summary-bar">
+            <div class="stat-metric-card">
+              <div class="stat-metric-num" id="stat-pages">0</div>
+              <div class="stat-metric-label">Pages</div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="stat-metric-num" id="stat-words">0</div>
+              <div class="stat-metric-label">Total Words</div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="stat-metric-num" id="stat-chars">0</div>
+              <div class="stat-metric-label">Characters</div>
+            </div>
+            <div class="stat-metric-card">
+              <div class="stat-metric-num" id="stat-reading">0 min</div>
+              <div class="stat-metric-label">Reading Time</div>
+            </div>
+          </div>
+
+          <!-- Top Keywords -->
+          <div class="form-label">Key Topics / Topics Found:</div>
+          <div class="keyword-chips" id="keyword-chips-container">
+            <!-- Dynamically populated keywords -->
+          </div>
+
+          <!-- Summary Mode & Length Options -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; padding: 14px; background: var(--bg-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); margin: 16px 0;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Summary Format</label>
+              <select id="summary-format-select" class="form-select">
+                <option value="bullet" selected>⚡ Key Takeaways (Bullet Points)</option>
+                <option value="executive">📄 Executive Summary (Paragraphs)</option>
+                <option value="detailed">🔍 Detailed Summary (In-depth)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+              <div style="display: flex; justify-content: space-between;">
+                <label class="form-label">Summary Length</label>
+                <span id="summary-length-val" style="font-weight: 700; color: var(--ghost-purple);">5 sentences</span>
+              </div>
+              <input type="range" id="summary-length-slider" class="range-slider" min="3" max="20" value="5">
+            </div>
+          </div>
+
+          <!-- Summary & Full Text Tabs -->
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button class="btn btn-secondary btn-sm" id="btn-view-summary" style="border-color: var(--ghost-purple); color: var(--ghost-purple);">
+              ✨ Summary
+            </button>
+            <button class="btn btn-secondary btn-sm" id="btn-view-raw">
+              📜 Full Extracted Text
+            </button>
+            <div style="margin-left: auto; display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btn-copy-text" title="Copy to clipboard">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copy
+              </button>
+              <button class="btn btn-secondary btn-sm" id="btn-download-txt" title="Download as text file">
+                Download .TXT
+              </button>
+              <button class="btn btn-primary btn-sm" id="btn-export-summary-pdf" title="Export as PDF file">
+                Export to .PDF
+              </button>
+            </div>
+          </div>
+
+          <!-- Output Box -->
+          <div class="summary-output-container" id="summary-text-display">
+            <!-- Summary or Raw text rendered here -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Zoom Preview Modal -->
+  <div class="modal-overlay" id="preview-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="font-size: 1rem; font-weight: 700;" id="modal-page-title">Page Preview</h3>
+        <button class="btn btn-secondary btn-sm" id="modal-close-btn" style="padding: 4px 8px;">✕ Close</button>
+      </div>
+      <div class="modal-body" id="modal-preview-body">
+        <canvas id="modal-canvas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Application Modules -->
+  <script src="js/app.js"></script>
+  <script src="js/pdf-cutter.js"></script>
+  <script src="js/pdf-compressor.js"></script>
+  <script src="js/image-to-pdf.js"></script>
+  <script src="js/pdf-merger.js"></script>
+  <script src="js/pdf-summarizer.js"></script>
+</body>
+</html>
